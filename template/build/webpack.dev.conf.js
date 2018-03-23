@@ -7,6 +7,7 @@ const path = require('path')
 const baseWebpackConfig = require('./webpack.base.conf')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MultipageWebpackPlugin = require('multipage-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
 
@@ -52,10 +53,21 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update.
     new webpack.NoEmitOnErrorsPlugin(),
     // https://github.com/ampedandwired/html-webpack-plugin
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: 'index.html',
-      inject: true
+    new webpack.optimize.ModuleConcatenationPlugin(),
+    new MultipageWebpackPlugin({
+      // replace [name] in template path
+      htmlTemplatePath: path.resolve('./src/pages/[name]/app.html'),
+      templateFilename: '[name].html',
+      templatePath: './',
+      // some other options in htmlWebpackPlugin
+      htmlWebpackPluginOptions: {
+        minify: {
+          removeComments: true,
+          collapseWhitespace: true,
+          removeAttributeQuotes: true
+        },
+        hash: process.env.NODE_ENV === 'production'
+      }
     }),
     // copy custom static assets
     new CopyWebpackPlugin([
