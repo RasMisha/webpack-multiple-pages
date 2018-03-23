@@ -1,5 +1,6 @@
 'use strict'
 const path = require('path')
+const glob = require('glob')
 const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
@@ -7,6 +8,12 @@ const vueLoaderConfig = require('./vue-loader.conf')
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
 }
+
+const entries = {}
+glob.sync('./src/pages/**/app.js').forEach(path => {
+  const chunk = path.split('./src/pages/')[1].split('/app.js')[0]
+  entries[chunk] = path
+})
 
 {{#lint}}const createLintingRule = () => ({
   test: /\.(js|vue)$/,
@@ -21,9 +28,7 @@ function resolve (dir) {
 
 module.exports = {
   context: path.resolve(__dirname, '../'),
-  entry: {
-    app: './src/main.js'
-  },
+  entry: entries,
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',
